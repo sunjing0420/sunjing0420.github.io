@@ -1,177 +1,109 @@
-var holidays=["<br />Thanksgiving!","<br />Christmas!","<br />New Year!","<br />President's Day!","<br />Easter!","<br />Summer!"];
-console.log(holidays);
-var count=0;
-  
-// students.push("d");
-console.log(holidays.length);
+  // SDK Needs to create video and canvas nodes in the DOM in order to function
+      // Here we are adding those nodes a predefined div.
+      var divRoot = $("#affdex_elements")[0];
+      var width = 640;
+      var height = 480;
+      var faceMode = affdex.FaceDetectorMode.LARGE_FACES;
+      //Construct a CameraDetector and specify the image width / height and face detector mode.
+      var detector = new affdex.CameraDetector(divRoot, width, height, faceMode);
 
-  
+      //Enable detection of all Expressions, Emotions and Emojis classifiers.
+      detector.detectAllEmotions();
+      detector.detectAllExpressions();
+      detector.detectAllEmojis();
+      detector.detectAllAppearance();
 
-var show=["Labor Day"];
-	
-	function myFunction(){
-		if(count==0){
-			document.getElementById("block").innerHTML=show;	
-			
-		}
-		if(count==1){
-			show.push(holidays[0]);
-            document.getElementById("block").innerHTML=show;	
-            
-		}
-			if(count==2){
-			show.push(holidays[1]);
-            document.getElementById("block").innerHTML=show;	
-            
-        }	
-        if(count==3){
-			show.push(holidays[2]);
-            document.getElementById("block").innerHTML=show;	
-            
+      //Add a callback to notify when the detector is initialized and ready for runing.
+      detector.addEventListener("onInitializeSuccess", function() {
+        log('#logs', "The detector reports initialized");
+        //Display canvas instead of video feed because we want to draw the feature points on it
+        $("#face_video_canvas").css("display", "block");
+        $("#face_video").css("display", "none");
+      });
+
+      function log(node_name, msg) {
+        $(node_name).append("<span>" + msg + "</span><br />")
+      }
+
+      //function executes when Start button is pushed.
+      function onStart() {
+        if (detector && !detector.isRunning) {
+          $("#logs").html("");
+          detector.start();
         }
-if(count==4){
-			show.push(holidays[3]);
-            document.getElementById("block").innerHTML=show;	
-            
+        log('#logs', "Clicked the start button");
+      }
+
+      //function executes when the Stop button is pushed.
+      function onStop() {
+        log('#logs', "Clicked the stop button");
+        if (detector && detector.isRunning) {
+          detector.removeEventListener();
+          detector.stop();
         }
-        if(count==5){
-			show.push(holidays[4]);
-            document.getElementById("block").innerHTML=show;	
-            
+      };
+
+      //function executes when the Reset button is pushed.
+      function onReset() {
+        log('#logs', "Clicked the reset button");
+        if (detector && detector.isRunning) {
+          detector.reset();
+
+          $('#results').html("");
         }
-        if(count==6){
-			show.push(holidays[5]);
-            document.getElementById("block").innerHTML=show;	
-            
+      };
+
+      //Add a callback to notify when camera access is allowed
+      detector.addEventListener("onWebcamConnectSuccess", function() {
+        log('#logs', "Webcam access allowed");
+      });
+
+      //Add a callback to notify when camera access is denied
+      detector.addEventListener("onWebcamConnectFailure", function() {
+        log('#logs', "webcam denied");
+        console.log("Webcam access denied");
+      });
+
+      //Add a callback to notify when detector is stopped
+      detector.addEventListener("onStopSuccess", function() {
+        log('#logs', "The detector reports stopped");
+        $("#results").html("");
+      });
+
+      //Add a callback to receive the results from processing an image.
+      //The faces object contains the list of the faces detected in an image.
+      //Faces object contains probabilities for all the different expressions, emotions and appearance metrics
+      detector.addEventListener("onImageResultsSuccess", function(faces, image, timestamp) {
+        $('#results').html("");
+        log('#results', "Timestamp: " + timestamp.toFixed(2));
+        log('#results', "Number of faces found: " + faces.length);
+        if (faces.length > 0) {
+          log('#results', "Appearance: " + JSON.stringify(faces[0].appearance));
+          log('#results', "Emotions: " + JSON.stringify(faces[0].emotions, function(key, val) {
+            return val.toFixed ? Number(val.toFixed(0)) : val;
+          }));
+          log('#results', "Expressions: " + JSON.stringify(faces[0].expressions, function(key, val) {
+            return val.toFixed ? Number(val.toFixed(0)) : val;
+          }));
+          log('#results', "Emoji: " + faces[0].emojis.dominantEmoji);
+          drawFeaturePoints(image, faces[0].featurePoints);
         }
-        count=count+1;
+      });
 
-   //   for(var i=0;i<holidays.length;i++){
-   //  show.push(holidays[i]);
-   //  document.getElementById("block").innerHTML=show;	
-  
- 
-  	// }
-  
-  }
+      //Draw the detected facial feature points on the image
+      function drawFeaturePoints(img, featurePoints) {
+        var contxt = $('#face_video_canvas')[0].getContext('2d');
 
-console.log(show.length);
+        var hRatio = contxt.canvas.width / img.width;
+        var vRatio = contxt.canvas.height / img.height;
+        var ratio = Math.min(hRatio, vRatio);
 
+        contxt.strokeStyle = "#FFFFFF";
+        for (var id in featurePoints) {
+          contxt.beginPath();
+          contxt.arc(featurePoints[id].x,
+            featurePoints[id].y, 2, 0, 2 * Math.PI);
+          contxt.stroke();
 
-document.addEventListener("DOMContentLoaded", function(){
-		console.log("1111111");
-	var colorPool = ["#ffffff","#ffffff","#ffffff"];
-	var seconds = 0;
-	var size1 = 45;
-	var size2 = 100;
-	var state = 0;
-	var increment = 0;
-	var direction = 0;
-	var numOfColors = colorPool.length;
-	var rotateIncrement = 0;
-
-	var parentDiv= document.getElementsByClassName("blockContainer");
-	var div1 = document.getElementById("div1");
-	var div2 = document.getElementById("div2");
-	var div3 = document.getElementById("div3");
-
-	function timer(){
-		setInterval(function(){
-			console.log("timer setInterval");
-			seconds += 1;
-			console.log("seconds:" + seconds);
-
-			if(seconds == 100){
-				clearInterval(timer);
-			}
-
-			state = mod(seconds);
-			rotateIncrement = seconds * 90;
-			console.log("state: "+state);
-			loadingScreen();
-			console.log(parentDiv);
-
-			parentDiv[0].style.transform = "rotate(" +rotateIncrement + "deg)";
-			parentDiv[0].style.webkitTransform = "rotate(" +rotateIncrement + "deg)";
-
-		},1000);
-	}
-
-	function mod(num){
-		return num%numOfColors;
-	}
-
-	function loadingScreen(){
-		div1.style.backgroundColor= colorPool[mod(state)];
-		div2.style.backgroundColor= colorPool[mod(state+1)];
-		div3.style.backgroundColor= colorPool[mod(state+2)];
-	}
-
-	timer();
-	console.log("timer setInterval");
-
-
-});
-
-
-// var angel=[3];
-// angel[0]="image/angel1.jpg";
-// angel[1]="image/angel2.jpg";
-// angel[2]="image/angel3.jpg";
-// angel[3]="image/angel4.jpg";
-// var images = [];
-//     for(var i =0;i<4;i++){
-//         var img = new Image();
-//             img.src = 'image/angel1';
-//          images.push(img)
-//      }
-
-// var imageObj;
-// function preloader() 
-// { 
-// // counter 
-// // var i = 0; 
-// // create object 
-// imageObj = new Image(); 
-// // set image list 
-// images = new Array(); 
-// images[0]="image/angel1.jpg" 
-// images[1]="image/angel2.jpg" 
-// images[2]="image/angel3.jpg" 
-// images[3]="image/angel4.jpg" 
-// }
-
-  
-// // students.push("d");
-// // console.log(students.length);
-//    // document.getElementById("container").innerHTML=angel;
-// var selectedangel=new Array(0);
-
-
-// function myFunction(){
-//   // selectedangel.push("angel[random(0,1,2,3)]");
-//   // document.getElementById("container").innerHTML=angel;
-//   electedangel.push("images[random(0,1,2,3)]"); 
-// }
-
-
-
-
-// function preloader() 
-// { 
-// // counter 
-// var i = 0; 
-// // create object 
-// imageObj = new Image(); 
-// // set image list 
-// images = new Array(); 
-// images[0]="image/angel1.jpg" 
-// images[1]="image/angel2.jpg" 
-// images[2]="image/angel3.jpg" 
-// images[3]="image/angel4.jpg" 
-// // start preloading 
-// for(i=0; i<=3; i++) 
-// { 
-// imageObj.src=images[i]; 
-// } 
-// } 
+        }
+      }

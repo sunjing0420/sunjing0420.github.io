@@ -1,0 +1,34 @@
+@import 'https://fonts.googleapis.com/css?family=Gloria+Hallelujah';
+
+h1{
+	text-align: center;
+	font-family: 'Gloria Hallelujah', cursive;
+}
+
+#buttonContainer{
+	margin-left: 35vw;
+	position: relative;
+}
+
+.button{
+    width: 120px;
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+	font-family: 'Gloria Hallelujah', cursive;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 20px;
+
+}
+.button:hover {
+    background-color: #3e8e41;
+}
+
